@@ -118,9 +118,7 @@ During planning, if you encounter unknowns that cannot be sensibly deduced from 
 
 ---
 
-## Implementation Notes & Learnings
-
-These notes capture decisions and pitfalls discovered during the initial implementation. Future runs of this prompt should use them to avoid the same issues.
+## Implementation Notes
 
 ### Aspire Version Compatibility
 
