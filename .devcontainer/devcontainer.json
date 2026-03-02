@@ -6,8 +6,7 @@
       "version": "22"
     }
   },
-  "postCreateCommand": "dotnet workload install aspire && dotnet restore && cd src/frontend && npm install",
-  "postStartCommand": "cd /workspaces/agentic-coding-demo && dotnet build HealthDashboard.sln",
+  "postCreateCommand": "dotnet workload install aspire",
   "customizations": {
     "vscode": {
       "extensions": [
