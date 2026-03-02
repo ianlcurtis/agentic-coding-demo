@@ -4,15 +4,10 @@
   "features": {
     "ghcr.io/devcontainers/features/node:1": {
       "version": "22"
-    },
-    "ghcr.io/devcontainers/features/dotnet:2": {
-      "version": "latest",
-      "additionalVersions": "",
-      "dotnetRuntimeVersions": "",
-      "aspNetCoreRuntimeVersions": ""
     }
   },
-  "postCreateCommand": "dotnet workload install aspire",
+  "postCreateCommand": "dotnet workload install aspire && dotnet restore && cd src/frontend && npm install",
+  "postStartCommand": "cd /workspaces/agentic-coding-demo && dotnet build HealthDashboard.sln",
   "customizations": {
     "vscode": {
       "extensions": [
@@ -23,15 +18,16 @@
         "esbenp.prettier-vscode"
       ],
       "settings": {
-        "dotnet.defaultSolution": "src/HealthDashboard.sln"
+        "dotnet.defaultSolution": "HealthDashboard.sln"
       }
     }
   },
-  "forwardPorts": [5000, 5001, 5173, 15888],
+  "forwardPorts": [5240, 7131, 5173, 15236, 17125],
   "portsAttributes": {
-    "5000": { "label": "API (HTTP)" },
-    "5001": { "label": "API (HTTPS)" },
-    "5173": { "label": "React Dev Server" },
-    "15888": { "label": "Aspire Dashboard" }
+    "5240": { "label": "API (HTTP)", "onAutoForward": "notify" },
+    "7131": { "label": "API (HTTPS)", "onAutoForward": "silent" },
+    "5173": { "label": "React Dev Server", "onAutoForward": "openBrowser" },
+    "15236": { "label": "Aspire Dashboard (HTTP)", "onAutoForward": "silent" },
+    "17125": { "label": "Aspire Dashboard (HTTPS)", "onAutoForward": "silent" }
   }
 }

@@ -115,3 +115,43 @@ During planning, if you encounter unknowns that cannot be sensibly deduced from 
 - All API endpoints must return proper HTTP status codes and validation error messages.
 - The frontend must be responsive down to 375px viewport width.
 - Follow the acceptance criteria listed at the bottom of `Requirements.md`.
+
+---
+
+## Implementation Notes & Learnings
+
+These notes capture decisions and pitfalls discovered during the initial implementation. Future runs of this prompt should use them to avoid the same issues.
+
+### Aspire Version Compatibility
+
+- The dev container's .NET 9 SDK ships with **Aspire workload 8.2.2** (not 9.x). All Aspire NuGet packages (`Aspire.Hosting.AppHost`, `Aspire.Hosting.NodeJs`, etc.) must match **8.2.2**.
+- Do **not** add `<Sdk Name="Aspire.AppHost.Sdk" Version="..." />` to the AppHost csproj — it is not needed for Aspire 8.x and will cause build errors.
+- The `WaitFor()` orchestration API is only available in Aspire 9.0+. Do not use it with 8.2.2.
+
+### Vite Dev Server in Dev Containers / Codespaces
+
+- The Vite config must include `host: true`, `hmr: { clientPort: 443 }`, and `allowedHosts: true` so the dev server works correctly when accessed through Codespaces port forwarding.
+- The API proxy fallback URL must match the port in the API's `launchSettings.json` (default: `http://localhost:5240`), not an arbitrary port.
+- Vite also supports Aspire service-discovery env vars (`services__api__https__0`, `services__api__http__0`) when run under the AppHost.
+
+### TypeScript Configuration
+
+- Vite's React-TS template may enable `erasableSyntaxOnly` and `verbatimModuleSyntax` in `tsconfig.app.json`. These block TypeScript enums and mixed default/named imports.
+- Fix: set `erasableSyntaxOnly: false` and replace `verbatimModuleSyntax` with `isolatedModules: true`.
+
+### Backend Testing
+
+- Integration tests using `WebApplicationFactory<Program>` require `public partial class Program { }` at the bottom of the API's `Program.cs`.
+- The API serializes enums as strings via `JsonStringEnumConverter`. Test code that deserializes API responses must use the same `JsonSerializerOptions` with `JsonStringEnumConverter` and `PropertyNameCaseInsensitive = true`.
+- When overriding `DbContext` in tests, pre-compute the in-memory database name (e.g., `var dbName = $"TestDb_{Guid.NewGuid()}"`) and capture it in the lambda closure. Using `Guid.NewGuid()` directly inside the `AddDbContext` lambda creates a new database per scope/request, causing cross-request data loss.
+
+### Frontend Testing
+
+- The button text in `VitalForm` is "Log Vital" (not "Save"). Tests must match the actual rendered text.
+- Use `vitest.config.ts` (separate from `vite.config.ts`) for test configuration with `environment: 'jsdom'` and a setup file that imports `@testing-library/jest-dom/vitest`.
+
+### Running the App
+
+- Start the API first: `dotnet run --project src/HealthDashboard.Api/`
+- Start the frontend second: `cd src/frontend && npx vite`
+- Alternatively, run via Aspire AppHost: `dotnet run --project src/HealthDashboard.AppHost/`
